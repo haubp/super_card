@@ -1,16 +1,8 @@
-# This is a sample Python script.
+import arcade
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+arcade.open_window(600, 600, "Drawing window")
+arcade.set_background_color(arcade.csscolor.SKY_BLUE)
+arcade.start_render()
+arcade.draw_lrtb_rectangle_filled(0, 599, 300, 0, arcade.csscolor.GREEN)
+arcade.finish_render()
+arcade.run()
