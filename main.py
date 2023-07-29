@@ -1,51 +1,22 @@
-import random
+from Blackjack import *
+from Player import *
+from GameBoard import *
 import arcade
 
 
-class Card:
-    def __init__(self, n, s):
-        self.num = n
-        self.suit = s
-
-
-class Cards:
-    def __init__(self):
-        self.cards = []
-        for n in range(1, 14):
-            for s in ["heart", "diamond", "club", "spade"]:
-                self.cards.append(Card(n, s))
-
-    def shuffle(self):
-        for i in range(50):
-            start = random.randrange(1, 51)
-            end = random.randrange(start + 1, 53)
-            t = self.cards[end - 1]
-            tt = self.cards[start]
-            for j in range(start, end - 1):
-                temp = self.cards[j + 1]
-                self.cards[j + 1] = tt
-                tt = temp
-            self.cards[start] = t
-
-
-class Player:
-    def __init__(self):
-        self.cards = []
-
-
-class Blackjack:
-    def __int__(self):
-        self.cards = Cards()
-        self.cards.shuffle()
-
-
-
 def main():
-    b = Blackjack()
+    blackjack_game = Blackjack()
 
-    p1 = Player()
-    p2 = Player()
+    p1 = Player("Hau", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p2 = Player("Nguyen", "./assets/man.png", SPRITE_SCALING_PLAYER)
 
+    blackjack_game.add_player(p1)
+    blackjack_game.add_player(p2)
+
+    board = GameBoard(blackjack_game)
+
+    board.setup()
+    arcade.run()
 
 
 if __name__ == "__main__":
