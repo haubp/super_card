@@ -2,10 +2,12 @@ import arcade
 
 
 class Player(arcade.Sprite):
-    def __init__(self, name, filename, sprite_scaling):
+    def __init__(self, is_host, role, name, filename, sprite_scaling):
         super().__init__(filename, sprite_scaling)
         self.cards = arcade.SpriteList()
         self.name = name
+        self.is_host = is_host
+        self.role = role
 
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         for card in self.cards:
@@ -34,11 +36,6 @@ class Player(arcade.Sprite):
     def add_card(self, card):
         if card is not None:
             self.cards.append(card)
-
-    def show(self):
-        print("Card list of ", self.name)
-        for item in self.cards:
-            print(item.num, item.suit)
 
     def get_cards_point(self):
         total_point = 0

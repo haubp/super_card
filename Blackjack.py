@@ -7,8 +7,7 @@ class Blackjack:
         self.players = arcade.SpriteList()
         self.cardsBox = CardsBox()
         self.turn = 0
-        self.done = False
-        self.result = ""
+        self.state = "begin"
 
     def setup(self):
         if len(self.players) == 2:
@@ -25,10 +24,7 @@ class Blackjack:
     def draw(self):
         for player in self.players:
             player.draw()
-        if not self.done:
-            self.cardsBox.draw()
-        if self.result != "":
-            arcade.draw_text(self.result, 350, 300, arcade.color.WHITE, 14)
+        self.cardsBox.draw()
 
     def update(self):
         for player in self.players:
@@ -42,15 +38,6 @@ class Blackjack:
 
     def on_mouse_release(self, x, y):
         self.cardsBox.reset()
-        winners, losers = self.check_game_logic()
-        if len(losers) == len(self.players) or len(winners) == len(self.players):
-            self.result = "Draw"
-        elif len(winners) > 0:
-            for index, p in enumerate(winners):
-                self.result = f"{p.name} is the winner"
-        elif len(losers) > 0:
-            for index, p in enumerate(losers):
-                self.result = f"{p.name} is the loser"
 
     def add_player(self, player):
         self.players.append(player)
@@ -63,19 +50,3 @@ class Blackjack:
     def distribute_card(self, p):
         p.add_card(self.cardsBox.get_card())
 
-    def check_game_logic(self):
-        highest_point = 0
-        winners = []
-        losers = []
-        for p in self.players:
-            total_point = p.get_cards_point()
-            if 15 < total_point < 22 and total_point >= highest_point:
-                highest_point = total_point
-            if total_point > 21:
-                self.done = True
-                losers.append(p)
-        for p in self.players:
-            if p.get_cards_point() == highest_point:
-                self.done = True
-                winners.append(p)
-        return winners, losers
