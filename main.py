@@ -7,8 +7,8 @@ import arcade
 def main():
     blackjack_game = Blackjack()
 
-    p1 = Player("Hau", "./assets/man.png", SPRITE_SCALING_PLAYER)
-    p2 = Player("Nguyen", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p1 = Player("Hau", True, "me", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p2 = Player("Nguyen", False, "other", "./assets/man.png", SPRITE_SCALING_PLAYER)
 
     blackjack_game.add_player(p1)
     blackjack_game.add_player(p2)
