@@ -32,7 +32,13 @@ class Blackjack:
 
     def on_mouse_press(self, x, y):
         if self.cardsBox.collides_with_point((x, y)):
-            self.distribute_card(self.players[self.turn % len(self.players)])
+            card = self.cardsBox.get_card()
+            if self.players[self.turn % len(self.players)].role == "me":
+                card.up()
+                self.players[self.turn % len(self.players)].add_card(card)
+            else:
+                card.down()
+                self.players[self.turn % len(self.players)].add_card(card)
             self.turn += 1
             self.cardsBox.on_click()
 
@@ -45,7 +51,13 @@ class Blackjack:
     def distribute_card_for_all(self):
         for i in range(2):
             for p in self.players:
-                p.add_card(self.cardsBox.get_card())
+                card = self.cardsBox.get_card()
+                if p.role == "me":
+                    card.up()
+                    p.add_card(card)
+                else:
+                    card.down()
+                    p.add_card(card)
 
     def distribute_card(self, p):
         p.add_card(self.cardsBox.get_card())
