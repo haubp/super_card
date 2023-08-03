@@ -13,6 +13,7 @@ class Player(arcade.Sprite):
         for card in self.cards:
             card.draw()
         arcade.draw_text(self.name, self.center_x + 50, self.center_y, arcade.color.WHITE, 14)
+        arcade.draw_arc_outline(self.center_x, self.center_y, 55, 55, arcade.color.YELLOW_ROSE, 0, 270, 10)
         super().draw()
 
     def update(self):
