@@ -8,10 +8,9 @@ class Card(arcade.Sprite):
         self.suit = s
         self.frontImage = arcade.load_texture("./assets/cards/" + str(n) + "_of_" + s + ".png")
         self.backImage = arcade.load_texture("./assets/cards/back.png")
-        self.isShow = False
 
-    def toggle(self):
-        if self.isShow:
-            self.texture = self.backImage
-        else:
-            self.texture = self.frontImage
+    def up(self):
+        self.texture = self.frontImage
+
+    def down(self):
+        self.texture = self.backImage

@@ -8,11 +8,22 @@ class Player(arcade.Sprite):
         self.name = name
         self.is_host = is_host
         self.role = role
+        self.is_distributed = False
+        self.time = 0
+        self.point = 100
+        self.bid = 0
+        self.ready = False
+
+    def bet(self, b):
+        self.bid = b
 
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         for card in self.cards:
             card.draw()
         arcade.draw_text(self.name, self.center_x + 50, self.center_y, arcade.color.WHITE, 14)
+        if not self.is_distributed and self.time > 0:
+            arcade.draw_arc_outline(self.center_x, self.center_y, 55, 55, arcade.color.YELLOW_ROSE
+                                    , 0, self.time * 72, 10)
         super().draw()
 
     def update(self):
