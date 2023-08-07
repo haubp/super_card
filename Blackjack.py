@@ -9,7 +9,7 @@ class Blackjack:
         self.players = arcade.SpriteList()
         self.cardsBox = CardsBox()
         self.bidInput = TextInput(150, 50, 100, 30)
-        self.startButton = Button(400, 300, 200, 100, "Start")
+        self.startButton = Button(400, 300, 100, 50, "Start")
         self.turn = 1
         self.time = 0
         self.state = "BET"
