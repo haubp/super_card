@@ -14,6 +14,8 @@ class TextInput(arcade.Sprite):
 
         self.input_box_active = False
 
+        self.is_entered = False
+
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         super().draw()
 
@@ -37,6 +39,7 @@ class TextInput(arcade.Sprite):
                 self.text = self.text[:-1]
             elif symbol == arcade.key.ENTER:
                 self.input_box_active = False
+                self.is_entered = True
             elif symbol == arcade.key.ESCAPE:
                 self.text = ""
             else:

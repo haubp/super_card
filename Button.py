@@ -1,7 +1,7 @@
 import arcade
 
 class Button(arcade.Sprite):
-    def __init__(self, center_x, center_y, width, height, text, font_size=20, color=arcade.color.WHITE, button_color=arcade.color.BLUE):
+    def __init__(self, center_x, center_y, width, height, text, font_size=20, color=arcade.color.WHITE, button_color=arcade.color.AMAZON):
         super().__init__()
 
         self.center_x = center_x
@@ -19,8 +19,8 @@ class Button(arcade.Sprite):
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         super().draw()
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height,
-                                     self.button_color if not self.is_hovered else arcade.color.GREEN)
-        arcade.draw_text(self.text, self.center_x - self.width / 2 + 10, self.center_y - 10, self.color, self.font_size,
+                                     self.button_color if not self.is_hovered else arcade.color.GRAY)
+        arcade.draw_text(self.text, self.center_x - 30, self.center_y, self.color, self.font_size,
                          anchor_x='left', anchor_y='center')
 
     def on_mouse_motion(self, x, y, dx, dy):

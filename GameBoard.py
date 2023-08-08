@@ -3,7 +3,7 @@ import arcade
 
 # --- Constants ---
 SPRITE_SCALING_PLAYER = 0.1
-SCREEN_WIDTH = 800
+SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 600
 
 
