@@ -14,7 +14,6 @@ class Player(arcade.Sprite):
         self.bid = 10
         self.balance = 1000
         self.ready = False
-        self.game_finished = False
 
     def bet(self, b):
         self.bid = b

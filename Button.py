@@ -19,8 +19,8 @@ class Button(arcade.Sprite):
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         super().draw()
         arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height,
-                                     self.button_color if not self.is_hovered else arcade.color.GRAY)
-        arcade.draw_text(self.text, self.center_x - 30, self.center_y, self.color, self.font_size,
+                                     arcade.color.AMAZON)
+        arcade.draw_text(self.text, self.center_x - 30, self.center_y, self.color if not self.is_hovered else arcade.color.YELLOW_ROSE, self.font_size,
                          anchor_x='left', anchor_y='center')
 
     def on_mouse_motion(self, x, y, dx, dy):

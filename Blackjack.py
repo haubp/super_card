@@ -7,8 +7,9 @@ import arcade
 class Blackjack:
     def __init__(self):
         self.players = arcade.SpriteList()
-        self.cardsBox = CardsBox()
+        self.cardsBox = None
         self.bidInput = TextInput(450, 300, 100, 30)
+        self.betButton = Button(550, 300, 100, 50, "Bet")
         self.startButton = Button(450, 300, 100, 50, "Start")
         self.restartButton = Button(450, 300, 100, 50, "Again")
         self.turn = 1
@@ -28,8 +29,18 @@ class Blackjack:
             self.players[3].center_x = 650
             self.players[3].center_y = 550
 
+        self.cardsBox = CardsBox()
         self.cardsBox.center_x = 400
         self.cardsBox.center_y = 300
+
+        self.turn = 1
+        self.time = 0
+        self.finished_player = 0
+
+        for player in self.players:
+            player.cards.clear()
+            player.is_distributed = False
+            player.time = 0
 
         self.distribute_card_for_all()
 
@@ -38,6 +49,7 @@ class Blackjack:
             self.startButton.draw()
         elif self.state == "BET":
             self.bidInput.draw()
+            self.betButton.draw()
         elif self.state == "PLAY":
             for player in self.players:
                 player.draw()
@@ -74,37 +86,48 @@ class Blackjack:
             for player in self.players:
                 if player.collides_with_point((x, y)) and \
                         player.role != "me" and \
-                        player.is_distributed and \
-                        not player.game_finished:
+                        player.is_distributed:
                     for card in player.cards:
                         card.up()
                     self.calculate_cards_point(player)
-                    player.game_finished = True
                     self.finished_player += 1
                     if self.finished_player == 3:
                         self.state = "FINISH"
-        if self.state == "BET":
+        elif self.state == "BET":
             self.bidInput.on_mouse_press(x, y)
 
     def on_mouse_release(self, x, y):
         if self.state == "PLAY":
             self.cardsBox.reset()
-        if self.state == "START":
+        elif self.state == "START":
             self.startButton.on_mouse_release(x, y)
             if self.startButton.is_pressed:
                 self.startButton.is_pressed = False
+                self.startButton.is_hovered = False
                 self.state = "BET"
-        if self.state == "FINISH":
+        elif self.state == "FINISH":
             self.restartButton.on_mouse_release(x, y)
             if self.restartButton.is_pressed:
                 self.restartButton.is_pressed = False
+                self.restartButton.is_hovered = False
+                self.cardsBox = None
                 self.state = "BET"
+                self.setup()
+        elif self.state == "BET":
+            self.betButton.on_mouse_release(x, y)
+            if self.betButton.is_pressed:
+                self.players[self.myselfIndex].bet(self.bidInput.text)
+                self.betButton.is_pressed = False
+                self.betButton.is_hovered = False
+                self.state = "PLAY"
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self.state == "START":
             self.startButton.on_mouse_motion(x, y, dx, dy)
-        if self.state == "FINISH":
+        elif self.state == "FINISH":
             self.restartButton.on_mouse_motion(x, y, dx, dy)
+        elif self.state == "BET":
+            self.betButton.on_mouse_motion(x, y, dx, dy)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.state == "BET":
