@@ -1,5 +1,6 @@
 import arcade
 
+
 class TextInput(arcade.Sprite):
     def __init__(self, center_x, center_y, w, h):
         super().__init__()
@@ -21,10 +22,10 @@ class TextInput(arcade.Sprite):
 
         if self.input_box_active:
             arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, arcade.color.WHITE)
-            arcade.draw_text(self.text, self.center_x - self.width / 2 + 10, self.center_y - 10, self.text_color, 20)
+            arcade.draw_text(self.text, self.center_x - self.width / 2, self.center_y, self.text_color, 10)
         else:
             arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, arcade.color.GRAY)
-            arcade.draw_text(self.text, self.center_x - self.width / 2 + 10, self.center_y - 10, self.text_color, 20)
+            arcade.draw_text(self.text, self.center_x - self.width / 2, self.center_y, self.text_color, 10)
 
     def on_mouse_press(self, x, y):
         if (self.center_x - self.width / 2) <= x <= (self.center_x + self.width / 2) and \

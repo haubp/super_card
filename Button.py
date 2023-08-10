@@ -1,5 +1,6 @@
 import arcade
 
+
 class Button(arcade.Sprite):
     def __init__(self, center_x, center_y, width, height, text, font_size=20, color=arcade.color.WHITE, button_color=arcade.color.AMAZON):
         super().__init__()
