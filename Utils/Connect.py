@@ -9,4 +9,6 @@ async def connect_and_send():
         response = await websocket.recv()
         print(f"Received from server: {response}")
 
-asyncio.get_event_loop().run_until_complete(connect_and_send())
+
+def talk():
+    asyncio.get_event_loop().run_until_complete(connect_and_send())
