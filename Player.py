@@ -1,4 +1,44 @@
 import arcade
+import threading
+import websockets
+import time
+import asyncio
+
+
+# --- Constants ---
+URI = "ws://localhost:8765"
+
+
+class WebSocketListenerThread(threading.Thread):
+    def __init__(self, uri):
+        super().__init__()
+        self.uri = uri
+        self.stop_event = threading.Event()
+        self.realtime_data = None
+        self.loop = None
+
+    async def listen_to_websocket(self):
+        async with websockets.connect(self.uri) as websocket:
+            while not self.stop_event.is_set():
+                try:
+                    print("Ready to send data")
+                    await websocket.send("Hello, WebSocket Server!")
+                    response = await websocket.recv()
+                    print(f"Received from server: {response}")
+                    self.realtime_data = response
+                    time.sleep(1)
+                except websockets.exceptions.ConnectionClosed:
+                    print("WebSocket connection closed.")
+                    break
+
+    def run(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_until_complete(self.listen_to_websocket())
+
+    def stop(self):
+        if self.loop is not None:
+            self.loop.call_soon_threadsafe(self.loop.stop)
 
 
 class Player(arcade.Sprite):
@@ -14,6 +54,13 @@ class Player(arcade.Sprite):
         self.bid = 10
         self.balance = 1000
         self.ready = False
+
+        self.web_socket_thread = WebSocketListenerThread(URI)
+        self.web_socket_thread.start()
+
+    def __del__(self):
+        self.web_socket_thread.stop()
+        self.web_socket_thread.join()
 
     def bet(self, b):
         self.bid = b
