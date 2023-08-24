@@ -14,6 +14,7 @@ async def handle_client(websocket, path):
                 await websocket.send(CHAT_HISTORY)  # Send a response back
             else:
                 CHAT_HISTORY += ("\n" + message)
+                await websocket.send("OK")
     except websockets.ConnectionClosed:
         print("Client disconnected")
 

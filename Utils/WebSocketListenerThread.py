@@ -25,9 +25,12 @@ class WebSocketListenerThread(threading.Thread):
                 try:
                     if self.command != "":
                         await websocket.send(self.command)
+                        await websocket.recv()
+                        self.command = ""
+                    else:
+                        await websocket.send("chat_history")
                         response = await websocket.recv()
                         self.response_callback(response)
-                        self.command = ""
                     time.sleep(1)
                 except websockets.exceptions.ConnectionClosed:
                     print("WebSocket connection closed.")
