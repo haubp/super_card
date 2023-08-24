@@ -1,6 +1,7 @@
 import arcade
 from TextInput import *
 from Button import *
+from Utils.WebSocketListenerThread import  *
 
 
 class ChatBox(arcade.Sprite):
@@ -15,6 +16,17 @@ class ChatBox(arcade.Sprite):
 
         self.chatInput = TextInput(self.center_x + 40, self.center_y, 150, 25)
         self.chatHistory = []
+
+        self.web_socket_thread = WebSocketListenerThread(URI, self.response_come)
+        self.web_socket_thread.daemon = True
+        self.web_socket_thread.start()
+
+    def __del__(self):
+        self.web_socket_thread.stop()
+        self.web_socket_thread.join()
+
+    def response_come(self, response):
+        self.chatHistory = response.splitlines()
 
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         self.chatInput.draw()
@@ -33,6 +45,6 @@ class ChatBox(arcade.Sprite):
     def on_key_press(self, symbol, modifiers):
         self.chatInput.on_key_press(symbol, modifiers)
         if symbol == arcade.key.ENTER:
+            self.web_socket_thread.set_command(self.chatInput.text)
             self.chatHistory.append(self.name + ": " + self.chatInput.text)
             self.chatInput.text = ""
-
