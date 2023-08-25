@@ -1,6 +1,4 @@
 from CardsBox import *
-from TextInput import *
-from Button import *
 from ChatBox import *
 import arcade
 
@@ -11,6 +9,9 @@ class Blackjack:
         self.cardsBox = None
         self.bidInput = TextInput(450, 300, 100, 30)
         self.betButton = Button(550, 300, 100, 50, "Bet")
+        self.userNameInput = TextInput(450, 300, 100, 30)
+        self.userName = ""
+        self.loginButton = Button(550, 300, 100, 50, "Login")
         self.startButton = Button(450, 300, 100, 50, "Start")
         self.restartButton = Button(450, 300, 100, 50, "Again")
         self.chatBox = None
@@ -31,7 +32,7 @@ class Blackjack:
             self.players[3].center_x = 650
             self.players[3].center_y = 550
 
-        self.chatBox = ChatBox(50, 50, 150, 200, self.players[0].name)
+        self.chatBox = ChatBox(50, 50, 150, 200, self.userName)
 
         self.cardsBox = CardsBox()
         self.cardsBox.center_x = 400
@@ -51,6 +52,9 @@ class Blackjack:
     def draw(self):
         if self.state == "START":
             self.startButton.draw()
+        elif self.state == "LOGIN":
+            self.userNameInput.draw()
+            self.loginButton.draw()
         elif self.state == "BET":
             self.bidInput.draw()
             self.betButton.draw()
@@ -102,6 +106,8 @@ class Blackjack:
             self.chatBox.on_mouse_press(x, y)
         elif self.state == "BET":
             self.bidInput.on_mouse_press(x, y)
+        elif self.state == "LOGIN":
+            self.userNameInput.on_mouse_press(x, y)
 
     def on_mouse_release(self, x, y):
         if self.state == "PLAY":
@@ -111,6 +117,15 @@ class Blackjack:
             if self.startButton.is_pressed:
                 self.startButton.is_pressed = False
                 self.startButton.is_hovered = False
+                self.state = "LOGIN"
+        elif self.state == "LOGIN":
+            self.loginButton.on_mouse_release(x, y)
+            if self.loginButton.is_pressed:
+                self.userName = self.userNameInput.text
+                self.userNameInput.text = ""
+                self.chatBox.name = self.userName
+                self.loginButton.is_pressed = False
+                self.loginButton.is_hovered = False
                 self.state = "BET"
         elif self.state == "FINISH":
             self.restartButton.on_mouse_release(x, y)
@@ -135,6 +150,8 @@ class Blackjack:
             self.restartButton.on_mouse_motion(x, y, dx, dy)
         elif self.state == "BET":
             self.betButton.on_mouse_motion(x, y, dx, dy)
+        elif self.state == "LOGIN":
+            self.loginButton.on_mouse_motion(x, y, dx, dy)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if self.state == "BET":
@@ -145,6 +162,14 @@ class Blackjack:
                 self.bidInput.is_entered = False
         if self.state == "PLAY":
             self.chatBox.on_key_press(symbol, modifiers)
+        if self.state == "LOGIN":
+            self.userNameInput.on_key_press(symbol, modifiers)
+            if self.userNameInput.is_entered:
+                self.userName = self.userNameInput.text
+                self.userNameInput.text = ""
+                self.chatBox.name = self.userName
+                self.state = "BET"
+                self.userNameInput.is_entered = False
 
     def add_player(self, player):
         self.players.append(player)
