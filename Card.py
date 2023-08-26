@@ -9,6 +9,9 @@ class Card(arcade.Sprite):
         self.frontImage = arcade.load_texture("./assets/cards/" + str(n) + "_of_" + s + ".png")
         self.backImage = arcade.load_texture("./assets/cards/back.png")
 
+    def to_string(self):
+        return str(self.num) + "-" + self.suit
+
     def up(self):
         self.texture = self.frontImage
 

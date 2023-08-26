@@ -20,6 +20,39 @@ class Blackjack:
         self.state = "START"
         self.myselfIndex = 0
         self.finished_player = 0
+        self.play_state = {
+            "hau": {
+                "card_list": [],
+                "is_distributed": False,
+            },
+            "nguyen": {
+                "card_list": [],
+                "is_distributed": False,
+            },
+            "nam": {
+                "card_list": [],
+                "is_distributed": False,
+            },
+            "thien": {
+                "card_list": [],
+                "is_distributed": False,
+            }
+        }
+
+        self.web_socket_thread = WebSocketListenerThread(URI, self.response_come)
+        self.web_socket_thread.daemon = True
+        self.web_socket_thread.start()
+
+    def __del__(self):
+        self.web_socket_thread.stop()
+        self.web_socket_thread.join()
+
+    def send_command(self):
+        self.web_socket_thread.set_command("push_game_state|" + json.dumps(self.play_state))
+
+    @staticmethod
+    def response_come(response):
+        print(response)
 
     def setup(self):
         if len(self.players) == 4:
@@ -82,25 +115,28 @@ class Blackjack:
 
     def on_mouse_press(self, x, y):
         if self.state == "PLAY":
-            if self.cardsBox.collides_with_point((x, y)) and not self.players[self.turn % len(self.players)].is_distributed:
-                card = self.cardsBox.get_card()
-                if self.players[self.turn % len(self.players)].name == self.userName:
-                    card.up()
-                    self.players[self.turn % len(self.players)].add_card(card)
-                else:
-                    card.down()
-                    self.players[self.turn % len(self.players)].add_card(card)
-                self.cardsBox.on_click()
-            for player in self.players:
-                if player.collides_with_point((x, y)) and \
-                        player.role != "me" and \
-                        player.is_distributed:
-                    for card in player.cards:
+            if self.userName == "hau":
+                if self.cardsBox.collides_with_point((x, y)) and not self.players[self.turn % len(self.players)].is_distributed:
+                    card = self.cardsBox.get_card()
+                    if self.players[self.turn % len(self.players)].name == self.userName:
                         card.up()
-                    self.calculate_cards_point(player)
-                    self.finished_player += 1
-                    if self.finished_player == 3:
-                        self.state = "FINISH"
+                    else:
+                        card.down()
+                    self.players[self.turn % len(self.players)].add_card(card)
+                    self.play_state[self.players[self.turn % len(self.players)].name]["card_list"] = json.dumps([c.to_string() for c in self.players[self.turn % len(self.players)].cards])
+                    self.send_command()
+                    self.cardsBox.on_click()
+                for player in self.players:
+                    if player.collides_with_point((x, y)) and \
+                            player.role != "me" and \
+                            player.is_distributed:
+                        for card in player.cards:
+                            card.up()
+                        self.calculate_cards_point(player)
+                        self.finished_player += 1
+                        if self.finished_player == 3:
+                            self.state = "FINISH"
+                        self.send_command()
             self.chatBox.on_mouse_press(x, y)
         elif self.state == "BET":
             self.bidInput.on_mouse_press(x, y)
@@ -159,6 +195,7 @@ class Blackjack:
                 self.players[self.myselfIndex].bet(self.bidInput.text)
                 self.state = "PLAY"
                 self.bidInput.is_entered = False
+                self.distribute_card_for_all()
         if self.state == "PLAY":
             self.chatBox.on_key_press(symbol, modifiers)
         if self.state == "LOGIN":
@@ -179,10 +216,12 @@ class Blackjack:
                 card = self.cardsBox.get_card()
                 if p.name == self.userName:
                     card.up()
-                    p.add_card(card)
                 else:
                     card.down()
-                    p.add_card(card)
+                p.add_card(card)
+                self.play_state[p.name]["card_list"] = json.dumps(
+                    [c.to_string() for c in p.cards])
+        self.send_command()
 
     def distribute_card(self, p):
         p.add_card(self.cardsBox.get_card())

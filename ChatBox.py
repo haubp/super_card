@@ -2,6 +2,7 @@ import arcade
 from TextInput import *
 from Button import *
 from Utils.WebSocketListenerThread import  *
+import json
 
 
 class ChatBox(arcade.Sprite):
@@ -27,7 +28,8 @@ class ChatBox(arcade.Sprite):
         self.web_socket_thread.join()
 
     def response_come(self, response):
-        self.chatHistory = response.splitlines()
+        chat = json.loads(response)["chat_history"]
+        self.chatHistory = chat.splitlines()
         self.currentChat = self.chatHistory[-12:]
 
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
@@ -47,6 +49,6 @@ class ChatBox(arcade.Sprite):
     def on_key_press(self, symbol, modifiers):
         self.chatInput.on_key_press(symbol, modifiers)
         if self.chatInput.is_entered and symbol == arcade.key.ENTER:
-            self.web_socket_thread.set_command("push_chat|" + self.name + ": " + self.chatInput.text)
+            self.web_socket_thread.set_command("chat|" + self.name + ": " + self.chatInput.text)
             self.chatInput.text = ""
             self.chatInput.is_entered = False

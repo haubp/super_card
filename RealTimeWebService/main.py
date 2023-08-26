@@ -1,8 +1,12 @@
 import asyncio
 import websockets
+import json
 
-CHAT_HISTORY = "hello world"
-GAME_STATE = {}
+CHAT_HISTORY = ""
+GAME_STATE = {
+    "play": {},
+    "chat_history": CHAT_HISTORY
+}
 
 
 async def handle_client(websocket, path):
@@ -12,22 +16,16 @@ async def handle_client(websocket, path):
     try:
         while True:
             message = await websocket.recv()  # Wait for a message from the client
-            print(message)
             command, content = message.split('|')
 
-            if command == "receive_chat_history":
-                print("receive_chat_history")
-                await websocket.send(CHAT_HISTORY)  # Send a response back
-            elif command == "receive_game_state":
-                print("receive_game_state")
-                await websocket.send(GAME_STATE)
+            if command == "receive_game_state":
+                await websocket.send(json.dumps(GAME_STATE))
             elif command == "push_game_state":
-                print("push_game_state")
-                GAME_STATE = content
+                GAME_STATE["play"] = json.loads(content)
                 await websocket.send("OK")
-            elif command == "push_chat":
-                print("push_chat")
+            elif command == "chat":
                 CHAT_HISTORY += ("\n" + content)
+                GAME_STATE["chat_history"] = CHAT_HISTORY
                 await websocket.send("OK")
     except websockets.ConnectionClosed:
         print("Client disconnected")
