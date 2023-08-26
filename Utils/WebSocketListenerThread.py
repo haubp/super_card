@@ -28,7 +28,7 @@ class WebSocketListenerThread(threading.Thread):
                         await websocket.recv()
                         self.command = ""
                     else:
-                        await websocket.send("chat_history")
+                        await websocket.send("receive_chat_history|")
                         response = await websocket.recv()
                         self.response_callback(response)
                     time.sleep(0.5)

@@ -47,6 +47,6 @@ class ChatBox(arcade.Sprite):
     def on_key_press(self, symbol, modifiers):
         self.chatInput.on_key_press(symbol, modifiers)
         if self.chatInput.is_entered and symbol == arcade.key.ENTER:
-            self.web_socket_thread.set_command(self.name + ": " + self.chatInput.text)
+            self.web_socket_thread.set_command("push_chat|" + self.name + ": " + self.chatInput.text)
             self.chatInput.text = ""
             self.chatInput.is_entered = False

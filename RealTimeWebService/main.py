@@ -2,18 +2,32 @@ import asyncio
 import websockets
 
 CHAT_HISTORY = "hello world"
+GAME_STATE = {}
 
 
 async def handle_client(websocket, path):
     global CHAT_HISTORY
+    global GAME_STATE
     # This function will be called whenever a new WebSocket client connects.
     try:
         while True:
             message = await websocket.recv()  # Wait for a message from the client
-            if message == "chat_history":
+            print(message)
+            command, content = message.split('|')
+
+            if command == "receive_chat_history":
+                print("receive_chat_history")
                 await websocket.send(CHAT_HISTORY)  # Send a response back
-            else:
-                CHAT_HISTORY += ("\n" + message)
+            elif command == "receive_game_state":
+                print("receive_game_state")
+                await websocket.send(GAME_STATE)
+            elif command == "push_game_state":
+                print("push_game_state")
+                GAME_STATE = content
+                await websocket.send("OK")
+            elif command == "push_chat":
+                print("push_chat")
+                CHAT_HISTORY += ("\n" + content)
                 await websocket.send("OK")
     except websockets.ConnectionClosed:
         print("Client disconnected")
