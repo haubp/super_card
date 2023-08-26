@@ -47,8 +47,6 @@ class Blackjack:
             player.is_distributed = False
             player.time = 0
 
-        self.distribute_card_for_all()
-
     def draw(self):
         if self.state == "START":
             self.startButton.draw()
@@ -86,7 +84,7 @@ class Blackjack:
         if self.state == "PLAY":
             if self.cardsBox.collides_with_point((x, y)) and not self.players[self.turn % len(self.players)].is_distributed:
                 card = self.cardsBox.get_card()
-                if self.players[self.turn % len(self.players)].role == "me":
+                if self.players[self.turn % len(self.players)].name == self.userName:
                     card.up()
                     self.players[self.turn % len(self.players)].add_card(card)
                 else:
@@ -142,6 +140,7 @@ class Blackjack:
                 self.betButton.is_pressed = False
                 self.betButton.is_hovered = False
                 self.state = "PLAY"
+                self.distribute_card_for_all()
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self.state == "START":
@@ -178,7 +177,7 @@ class Blackjack:
         for i in range(2):
             for p in self.players:
                 card = self.cardsBox.get_card()
-                if p.role == "me":
+                if p.name == self.userName:
                     card.up()
                     p.add_card(card)
                 else:
