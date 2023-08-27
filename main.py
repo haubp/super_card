@@ -7,10 +7,10 @@ import arcade
 def main():
     blackjack_game = Blackjack()
 
-    p1 = Player(True, "me", "Hau", "./assets/man.png", SPRITE_SCALING_PLAYER)
-    p2 = Player(False, "other", "Nguyen", "./assets/man.png", SPRITE_SCALING_PLAYER)
-    p3 = Player(False, "other", "Nam", "./assets/man.png", SPRITE_SCALING_PLAYER)
-    p4 = Player(False, "other", "Thien", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p1 = Player(True, "me", "hau", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p2 = Player(False, "other", "nguyen", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p3 = Player(False, "other", "nam", "./assets/man.png", SPRITE_SCALING_PLAYER)
+    p4 = Player(False, "other", "thien", "./assets/man.png", SPRITE_SCALING_PLAYER)
 
     blackjack_game.add_player(p1)
     blackjack_game.add_player(p2)

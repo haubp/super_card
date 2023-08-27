@@ -28,10 +28,10 @@ class WebSocketListenerThread(threading.Thread):
                         await websocket.recv()
                         self.command = ""
                     else:
-                        await websocket.send("chat_history")
+                        await websocket.send("receive_game_state|")
                         response = await websocket.recv()
                         self.response_callback(response)
-                    time.sleep(1)
+                    time.sleep(0.5)
                 except websockets.exceptions.ConnectionClosed:
                     print("WebSocket connection closed.")
                     break

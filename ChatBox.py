@@ -2,6 +2,7 @@ import arcade
 from TextInput import *
 from Button import *
 from Utils.WebSocketListenerThread import  *
+import json
 
 
 class ChatBox(arcade.Sprite):
@@ -16,6 +17,7 @@ class ChatBox(arcade.Sprite):
 
         self.chatInput = TextInput(self.center_x + 40, self.center_y, 150, 25)
         self.chatHistory = []
+        self.currentChat = []
 
         self.web_socket_thread = WebSocketListenerThread(URI, self.response_come)
         self.web_socket_thread.daemon = True
@@ -26,7 +28,9 @@ class ChatBox(arcade.Sprite):
         self.web_socket_thread.join()
 
     def response_come(self, response):
-        self.chatHistory = response.splitlines()
+        chat = json.loads(response)["chat_history"]
+        self.chatHistory = chat.splitlines()
+        self.currentChat = self.chatHistory[-12:]
 
     def draw(self, *, filter=None, pixelated=None, blend_function=None):
         self.chatInput.draw()
@@ -35,7 +39,7 @@ class ChatBox(arcade.Sprite):
                                      arcade.color.AMAZON)
         arcade.draw_rectangle_outline(self.center_x + 40, self.center_y + 120, self.width, self.height,
                                       arcade.color.BLACK_OLIVE)
-        for index, text in enumerate(self.chatHistory):
+        for index, text in enumerate(self.currentChat):
             arcade.draw_text(text, self.center_x - 20, self.center_y + 200 - index * 15,
                              arcade.color.WHITE, 10)
 
@@ -44,6 +48,7 @@ class ChatBox(arcade.Sprite):
 
     def on_key_press(self, symbol, modifiers):
         self.chatInput.on_key_press(symbol, modifiers)
-        if symbol == arcade.key.ENTER:
-            self.web_socket_thread.set_command(self.name + ": " + self.chatInput.text)
+        if self.chatInput.is_entered and symbol == arcade.key.ENTER:
+            self.web_socket_thread.set_command("chat|" + self.name + ": " + self.chatInput.text)
             self.chatInput.text = ""
+            self.chatInput.is_entered = False
