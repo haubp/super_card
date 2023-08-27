@@ -48,11 +48,32 @@ class Blackjack:
         self.web_socket_thread.join()
 
     def send_command(self):
+        print("push_game_state|" + json.dumps(self.play_state))
         self.web_socket_thread.set_command("push_game_state|" + json.dumps(self.play_state))
 
-    @staticmethod
-    def response_come(response):
-        print(response)
+    def response_come(self, response):
+        if self.userName != "" and self.userName != "hau":
+            state = json.loads(response, )["play"]
+            print(state)
+            for player in self.players:
+                if player.name in state:
+                    state[player.name]["card_list"] = json.loads(state[player.name]["card_list"])
+                    for c in state[player.name]["card_list"]:
+                        found = False
+                        for item in player.cards:
+                            if item.to_string() == c:
+                                found = True
+                        if not found:
+                            n, s = c.split("-")
+                            card = Card(n, s, SPRITE_SCALING_CARD)
+                            #if player.name == self.userName:
+                            #    card.up()
+                            #else:
+                            #    card.down()
+                            card.up()
+                            card.center_x = 400
+                            card.center_y = 300
+                            player.add_card(card)
 
     def setup(self):
         if len(self.players) == 4:
@@ -118,10 +139,11 @@ class Blackjack:
             if self.userName == "hau":
                 if self.cardsBox.collides_with_point((x, y)) and not self.players[self.turn % len(self.players)].is_distributed:
                     card = self.cardsBox.get_card()
-                    if self.players[self.turn % len(self.players)].name == self.userName:
-                        card.up()
-                    else:
-                        card.down()
+                    #if self.players[self.turn % len(self.players)].name == self.userName:
+                    #    card.up()
+                    #else:
+                    #    card.down()
+                    card.up()
                     self.players[self.turn % len(self.players)].add_card(card)
                     self.play_state[self.players[self.turn % len(self.players)].name]["card_list"] = json.dumps([c.to_string() for c in self.players[self.turn % len(self.players)].cards])
                     self.send_command()
@@ -176,7 +198,8 @@ class Blackjack:
                 self.betButton.is_pressed = False
                 self.betButton.is_hovered = False
                 self.state = "PLAY"
-                self.distribute_card_for_all()
+                if self.userName == "hau":
+                    self.distribute_card_for_all()
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self.state == "START":
@@ -214,10 +237,11 @@ class Blackjack:
         for i in range(2):
             for p in self.players:
                 card = self.cardsBox.get_card()
-                if p.name == self.userName:
-                    card.up()
-                else:
-                    card.down()
+                #if p.name == self.userName:
+                #    card.up()
+                #else:
+                #    card.down()
+                card.up()
                 p.add_card(card)
                 self.play_state[p.name]["card_list"] = json.dumps(
                     [c.to_string() for c in p.cards])
