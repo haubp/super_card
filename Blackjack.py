@@ -24,19 +24,24 @@ class Blackjack:
             "hau": {
                 "card_list": [],
                 "is_opened": False,
+                "balance": 1000,
             },
             "nguyen": {
                 "card_list": [],
                 "is_opened": False,
+                "balance": 1000,
             },
             "nam": {
                 "card_list": [],
                 "is_opened": False,
+                "balance": 1000,
             },
             "thien": {
                 "card_list": [],
                 "is_opened": False,
-            }
+                "balance": 1000,
+            },
+            "is_finished": False,
         }
 
         self.web_socket_thread = WebSocketListenerThread(URI, self.response_come)
@@ -52,28 +57,31 @@ class Blackjack:
         self.web_socket_thread.set_command("push_game_state|" + json.dumps(self.play_state))
 
     def response_come(self, response):
-        if self.userName != "" and self.userName != "hau":
-            state = json.loads(response, )["play"]
-            self.play_state = state
-            print(state)
-            for player in self.players:
-                if player.name in state:
-                    state[player.name]["card_list"] = json.loads(state[player.name]["card_list"])
-                    for c in state[player.name]["card_list"]:
-                        found = False
-                        for item in player.cards:
-                            if item.to_string() == c:
-                                found = True
-                        if not found:
-                            n, s = c.split("-")
-                            card = Card(n, s, SPRITE_SCALING_CARD)
-                            if player.name == self.userName:
-                                card.up()
-                            else:
-                                card.down()
-                            card.center_x = 400
-                            card.center_y = 300
-                            player.add_card(card)
+        if self.state == "PLAY":
+            if self.userName != "" and self.userName != "hau":
+                self.play_state = json.loads(response)["play"]
+                state = self.play_state
+                print(state)
+                for player in self.players:
+                    if player.name in state:
+                        state[player.name]["card_list"] = json.loads(state[player.name]["card_list"])
+                        for c in state[player.name]["card_list"]:
+                            found = False
+                            for item in player.cards:
+                                if item.to_string() == c:
+                                    found = True
+                            if not found:
+                                n, s = c.split("-")
+                                card = Card(n, s, SPRITE_SCALING_CARD)
+                                if player.name == self.userName:
+                                    card.up()
+                                else:
+                                    card.down()
+                                card.center_x = 400
+                                card.center_y = 300
+                                player.add_card(card)
+                if self.play_state["is_finished"]:
+                    self.state = "FINISH"
 
     def setup(self):
         if len(self.players) == 4:
@@ -101,6 +109,33 @@ class Blackjack:
             player.is_distributed = False
             player.time = 0
 
+        self.play_state = {
+            "hau": {
+                "card_list": [],
+                "is_opened": False,
+                "balance": 1000,
+            },
+            "nguyen": {
+                "card_list": [],
+                "is_opened": False,
+                "balance": 1000,
+            },
+            "nam": {
+                "card_list": [],
+                "is_opened": False,
+                "balance": 1000,
+            },
+            "thien": {
+                "card_list": [],
+                "is_opened": False,
+                "balance": 1000,
+            },
+            "is_finished": False,
+        }
+
+        if self.userName == "hau":
+            self.send_command()
+
     def draw(self):
         if self.state == "START":
             self.startButton.draw()
@@ -117,26 +152,28 @@ class Blackjack:
             self.chatBox.draw()
         elif self.state == "FINISH":
             for player in self.players:
+                for card in player.cards:
+                    card.up()
                 player.draw()
             self.restartButton.draw()
             self.chatBox.draw()
 
     def update(self):
-        if self.state == "PLAY":
-            self.time += 1
-            if self.time == 300:
-                self.time = 0
-                self.players[self.turn % len(self.players)].is_distributed = True
-                self.turn += 1
-
-            for index, player in enumerate(self.players):
-                player.update()
-
-            self.players[self.turn % len(self.players)].time = self.time / 60
-        if self.userName != "hau":
+        for index, player in enumerate(self.players):
+            player.update()
+        if self.userName == "hau":
+            if self.state == "PLAY":
+                self.time += 1
+                if self.time == 300:
+                    self.time = 0
+                    self.players[self.turn % len(self.players)].is_distributed = True
+                    self.turn += 1
+                self.players[self.turn % len(self.players)].time = self.time / 60
+        elif self.state == "PLAY":
             for player in self.players:
                 if player.name in self.play_state:
                     if not player.is_distributed and self.play_state[player.name]["is_opened"]:
+                        self.finished_player += 1
                         player.is_distributed = True
                         for card in player.cards:
                             card.up()
@@ -165,6 +202,7 @@ class Blackjack:
                         self.finished_player += 1
                         if self.finished_player == 3:
                             self.state = "FINISH"
+                            self.play_state["is_finished"] = True
                         self.send_command()
             self.chatBox.on_mouse_press(x, y)
         elif self.state == "BET":
@@ -272,3 +310,4 @@ class Blackjack:
         elif 14 <= opponent_point <= 21:
             self.players[self.myselfIndex].balance -= player.bid
             player.balance += player.bid
+        self.play_state[player.name]["point"] = player.balance
