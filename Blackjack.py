@@ -23,19 +23,19 @@ class Blackjack:
         self.play_state = {
             "hau": {
                 "card_list": [],
-                "is_distributed": False,
+                "is_opened": False,
             },
             "nguyen": {
                 "card_list": [],
-                "is_distributed": False,
+                "is_opened": False,
             },
             "nam": {
                 "card_list": [],
-                "is_distributed": False,
+                "is_opened": False,
             },
             "thien": {
                 "card_list": [],
-                "is_distributed": False,
+                "is_opened": False,
             }
         }
 
@@ -54,6 +54,7 @@ class Blackjack:
     def response_come(self, response):
         if self.userName != "" and self.userName != "hau":
             state = json.loads(response, )["play"]
+            self.play_state = state
             print(state)
             for player in self.players:
                 if player.name in state:
@@ -66,11 +67,10 @@ class Blackjack:
                         if not found:
                             n, s = c.split("-")
                             card = Card(n, s, SPRITE_SCALING_CARD)
-                            #if player.name == self.userName:
-                            #    card.up()
-                            #else:
-                            #    card.down()
-                            card.up()
+                            if player.name == self.userName:
+                                card.up()
+                            else:
+                                card.down()
                             card.center_x = 400
                             card.center_y = 300
                             player.add_card(card)
@@ -133,17 +133,23 @@ class Blackjack:
                 player.update()
 
             self.players[self.turn % len(self.players)].time = self.time / 60
+        if self.userName != "hau":
+            for player in self.players:
+                if player.name in self.play_state:
+                    if not player.is_distributed and self.play_state[player.name]["is_opened"]:
+                        player.is_distributed = True
+                        for card in player.cards:
+                            card.up()
 
     def on_mouse_press(self, x, y):
         if self.state == "PLAY":
             if self.userName == "hau":
                 if self.cardsBox.collides_with_point((x, y)) and not self.players[self.turn % len(self.players)].is_distributed:
                     card = self.cardsBox.get_card()
-                    #if self.players[self.turn % len(self.players)].name == self.userName:
-                    #    card.up()
-                    #else:
-                    #    card.down()
-                    card.up()
+                    if self.players[self.turn % len(self.players)].name == self.userName:
+                        card.up()
+                    else:
+                        card.down()
                     self.players[self.turn % len(self.players)].add_card(card)
                     self.play_state[self.players[self.turn % len(self.players)].name]["card_list"] = json.dumps([c.to_string() for c in self.players[self.turn % len(self.players)].cards])
                     self.send_command()
@@ -154,6 +160,7 @@ class Blackjack:
                             player.is_distributed:
                         for card in player.cards:
                             card.up()
+                        self.play_state[player.name]["is_opened"] = True
                         self.calculate_cards_point(player)
                         self.finished_player += 1
                         if self.finished_player == 3:
@@ -237,11 +244,10 @@ class Blackjack:
         for i in range(2):
             for p in self.players:
                 card = self.cardsBox.get_card()
-                #if p.name == self.userName:
-                #    card.up()
-                #else:
-                #    card.down()
-                card.up()
+                if p.name == self.userName:
+                    card.up()
+                else:
+                    card.down()
                 p.add_card(card)
                 self.play_state[p.name]["card_list"] = json.dumps(
                     [c.to_string() for c in p.cards])
