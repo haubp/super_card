@@ -1,5 +1,6 @@
 from CardsBox import *
 from ChatBox import *
+from RealTimeWebService.DB import *
 import arcade
 
 
@@ -14,6 +15,7 @@ class Blackjack:
         self.loginButton = Button(550, 300, 100, 50, "Login")
         self.startButton = Button(450, 300, 100, 50, "Start")
         self.restartButton = Button(450, 300, 100, 50, "Again")
+        self.saveButton = Button(450, 400, 100, 50, "Save")
         self.chatBox = None
         self.turn = 1
         self.time = 0
@@ -24,25 +26,26 @@ class Blackjack:
             "hau": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": 1000
             },
             "nguyen": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": 1000
             },
             "nam": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": 1000
             },
             "thien": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": 1000
             },
-            "is_finished": False,
+            "is_finished": False
         }
+        self.play_record = get_all_names_and_balances()
 
         self.web_socket_thread = WebSocketListenerThread(URI, self.response_come)
         self.web_socket_thread.daemon = True
@@ -56,12 +59,14 @@ class Blackjack:
         print("push_game_state|" + json.dumps(self.play_state))
         self.web_socket_thread.set_command("push_game_state|" + json.dumps(self.play_state))
 
+    def save_game_result(self):
+        self.web_socket_thread.set_command("save|" + json.dumps(self.play_state))
+
     def response_come(self, response):
         if self.state == "PLAY":
             if self.userName != "" and self.userName != "hau":
                 self.play_state = json.loads(response)["play"]
                 state = self.play_state
-                print(state)
                 for player in self.players:
                     if player.name in state:
                         state[player.name]["card_list"] = json.loads(state[player.name]["card_list"])
@@ -113,22 +118,22 @@ class Blackjack:
             "hau": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": self.play_state["hau"]["balance"],
             },
             "nguyen": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": self.play_state["nguyen"]["balance"],
             },
             "nam": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": self.play_state["nam"]["balance"],
             },
             "thien": {
                 "card_list": [],
                 "is_opened": False,
-                "balance": 1000,
+                "balance": self.play_state["thien"]["balance"],
             },
             "is_finished": False,
         }
@@ -145,17 +150,22 @@ class Blackjack:
         elif self.state == "BET":
             self.bidInput.draw()
             self.betButton.draw()
+            for index, record in enumerate(self.play_record):
+                arcade.draw_text(record, 400, 200 + index * 20, arcade.color.WHITE, 14)
         elif self.state == "PLAY":
             for player in self.players:
+                player.balance = self.play_state[player.name]["balance"]
                 player.draw()
             self.cardsBox.draw()
             self.chatBox.draw()
         elif self.state == "FINISH":
             for player in self.players:
+                player.balance = self.play_state[player.name]["balance"]
                 for card in player.cards:
                     card.up()
                 player.draw()
             self.restartButton.draw()
+            self.saveButton.draw()
             self.chatBox.draw()
 
     def update(self):
@@ -236,6 +246,12 @@ class Blackjack:
                 self.cardsBox = None
                 self.state = "BET"
                 self.setup()
+            self.saveButton.on_mouse_release(x, y)
+            if self.saveButton.is_pressed:
+                self.saveButton.is_pressed = False
+                self.saveButton.is_hovered = False
+                self.save_game_result()
+
         elif self.state == "BET":
             self.betButton.on_mouse_release(x, y)
             if self.betButton.is_pressed:
@@ -251,6 +267,7 @@ class Blackjack:
             self.startButton.on_mouse_motion(x, y, dx, dy)
         elif self.state == "FINISH":
             self.restartButton.on_mouse_motion(x, y, dx, dy)
+            self.saveButton.on_mouse_motion(x, y, dx, dy)
         elif self.state == "BET":
             self.betButton.on_mouse_motion(x, y, dx, dy)
         elif self.state == "LOGIN":
@@ -310,4 +327,6 @@ class Blackjack:
         elif 14 <= opponent_point <= 21:
             self.players[self.myselfIndex].balance -= player.bid
             player.balance += player.bid
-        self.play_state[player.name]["point"] = player.balance
+        self.play_state["hau"]["balance"] = self.players[self.myselfIndex].balance
+        self.play_state[player.name]["balance"] = player.balance
+        self.send_command()
