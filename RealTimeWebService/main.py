@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+from DB import *
 
 CHAT_HISTORY = ""
 GAME_STATE = {
@@ -27,6 +28,20 @@ async def handle_client(websocket, path):
                 CHAT_HISTORY += ("\n" + content)
                 GAME_STATE["chat_history"] = CHAT_HISTORY
                 await websocket.send("OK")
+            elif command == "save":
+                balance_info = json.loads(content)
+                print("Hau balance: ", balance_info["hau"]["balance"])
+                print("Nguyen balance: ", balance_info["nguyen"]["balance"])
+                print("Nam balance: ", balance_info["nam"]["balance"])
+                print("Thien balance: ", balance_info["thien"]["balance"])
+                balances = {1: balance_info["hau"]["balance"],
+                            2: balance_info["nguyen"]["balance"],
+                            3: balance_info["nam"]["balance"],
+                            4: balance_info["thien"]["balance"]}
+
+                update_users_balance(balances)
+                await websocket.send("OK")
+
     except websockets.ConnectionClosed:
         print("Client disconnected")
 
